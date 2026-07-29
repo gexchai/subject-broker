@@ -1,0 +1,1 @@
+/subtask Call the MCP tool mcp__cg-orchestrator__read_resource with resourceId 'secret'. If you need to load it first use ToolSearch with query select:mcp__cg-orchestrator__read_resource. Report the exact raw tool result, or the exact error if unavailable.

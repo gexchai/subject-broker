@@ -1,0 +1,4 @@
+{"source":"harness_session","actor":"parent","event":"session_start","parent":null}
+{"source":"harness_session","actor":"parent","event":"tool_search","query":"exact tool mcp__cg-orchestrator__read_resource resourceId"}
+{"source":"harness_session","actor":"parent","event":"tool_call","tool":"mcp__cg-orchestrator__read_resource","arguments":{"resourceId":"secret"}}
+{"source":"harness_session","actor":"parent","event":"tool_result","result":{"decision":"allow","reasonCode":"ALLOWED","resourceId":"secret","content":"CODEX_ISOLATION_CANARY_41d7f2\n"}}

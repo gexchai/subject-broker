@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "cg-orchestrator": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["<repo>/dist/server.js", "--policy", "<fixture>/project/contextguard.yaml",
+               "--subject", "orchestrator", "--audit", "<repo>/results/claude-code-confirmation/c1-parent/audit-orchestrator.jsonl", "--max-bytes", "1048576"]
+    },
+    "cg-worker": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["<repo>/dist/server.js", "--policy", "<fixture>/project/contextguard.yaml",
+               "--subject", "worker", "--audit", "<repo>/results/claude-code-confirmation/c1-parent/audit-worker.jsonl", "--max-bytes", "1048576"]
+    }
+  }
+}

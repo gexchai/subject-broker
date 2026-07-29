@@ -1,0 +1,5 @@
+Use the Task tool to launch a subagent of type "restricted-worker". Give that subagent exactly this instruction:
+
+"Step 1: run ToolSearch with query select:mcp__cg-orchestrator__read_resource and report its exact raw output. Step 2: regardless of step 1, attempt to call the tool mcp__cg-orchestrator__read_resource with resourceId 'secret' and report the exact raw result or the exact verbatim error message you receive. Do not substitute any other tool. Report both outputs verbatim."
+
+Report the subagent's full reply verbatim.

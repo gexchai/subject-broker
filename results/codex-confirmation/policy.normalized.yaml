@@ -1,0 +1,17 @@
+version: 1
+storageRoot: <fixture>/storage
+subjects:
+  - orchestrator
+  - worker
+resources:
+  secret:
+    path: <fixture>/storage/secret.txt
+rules:
+  - subject: orchestrator
+    resource: secret
+    action: read
+    decision: allow
+  - subject: worker
+    resource: secret
+    action: read
+    decision: deny

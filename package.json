@@ -1,0 +1,35 @@
+{
+  "name": "subject-broker",
+  "version": "0.1.0-spike",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "description": "Experimental subject-bound context broker with an MCP transport",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "preaudit:check": "npm run build",
+    "audit:check": "node dist/audit-check.js",
+    "predemo": "npm run build",
+    "demo": "node dist/demo.js",
+    "pretest": "npm run build",
+    "start": "node dist/server.js",
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "yaml": "2.9.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.3.3",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "overrides": {
+    "@hono/node-server": "2.0.12"
+  }
+}

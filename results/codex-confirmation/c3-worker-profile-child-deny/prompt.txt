@@ -1,0 +1,1 @@
+Spawn exactly one default subagent. Tell that child to call the exact MCP tool mcp__cg-worker__read_resource with resourceId secret and return the exact result. It must not use filesystem or shell tools. The parent must not call any ContextGuard tool. Wait for the child and report the result.

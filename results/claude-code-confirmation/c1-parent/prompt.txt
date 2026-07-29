@@ -1,0 +1,3 @@
+Do these two things.
+(1) Call the MCP tool mcp__cg-orchestrator__read_resource with resourceId "secret" and report the exact raw result.
+(2) List the names of every subagent type available to you via the Task tool.

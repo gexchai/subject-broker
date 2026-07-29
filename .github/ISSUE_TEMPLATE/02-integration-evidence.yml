@@ -1,0 +1,72 @@
+name: Agent integration evidence
+description: Propose a version-pinned delegation or MCP-isolation result
+title: "[Integration]: "
+labels:
+  - integration
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use synthetic data only. A model statement or refusal is not sufficient evidence of tool
+        isolation; include positive controls and harness- or broker-authored artifacts.
+  - type: input
+    id: harness
+    attributes:
+      label: Harness and exact version
+      placeholder: Example Agent CLI 1.2.3
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model and provider
+      description: Include only non-sensitive version information.
+    validations:
+      required: true
+  - type: textarea
+    id: topology
+    attributes:
+      label: Tested topology
+      description: Describe parent, child, profiles/processes, MCP connections, and delegation depth.
+      placeholder: Parent has orchestrator + worker; child is expected to have worker only.
+    validations:
+      required: true
+  - type: textarea
+    id: controls
+    attributes:
+      label: Positive and negative controls
+      description: Include parent control, allowed worker call, and privileged-first attempt.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Observed result
+      description: Separate direct observations from inference and proposed classification.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence retained
+      description: List exact prompts, normalized configuration/events, audits, versions, and source hashes.
+    validations:
+      required: true
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Limitations and untested surfaces
+      description: Name direct-access paths, forks, nested delegation, approval modes, or other exclusions.
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Evidence checks
+      options:
+        - label: The fixture and canary are synthetic.
+          required: true
+        - label: The result is version-pinned and does not generalize to future releases.
+          required: true
+        - label: Public artifacts contain no credentials, personal paths, or raw session/provider metadata.
+          required: true

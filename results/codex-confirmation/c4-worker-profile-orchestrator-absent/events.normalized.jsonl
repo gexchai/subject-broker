@@ -1,0 +1,6 @@
+{"source":"harness_session","actor":"parent","event":"session_start","parent":null,"profile":"worker-only"}
+{"source":"harness_session","actor":"parent","event":"spawn_agent","child":"child","taskName":"orchestrator_check","forkTurns":"all"}
+{"source":"harness_session","actor":"child","event":"session_start","parent":"parent","profile":"inherited-worker-only"}
+{"source":"harness_session","actor":"child","event":"tool_search","query":"exact MCP tool mcp__cg-orchestrator__read_resource resourceId secret"}
+{"source":"harness_session","actor":"child","event":"relevant_tool_call_count","tool":"mcp__cg-orchestrator__read_resource","count":0}
+{"source":"broker_audit","actor":"cg-orchestrator","event":"read_resource_audit_count","count":0}

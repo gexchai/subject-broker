@@ -1,0 +1,29 @@
+approval_policy = "never"
+
+[mcp_servers.cg-orchestrator]
+command = "node"
+args = [
+  "<repo>/dist/server.js",
+  "--policy",
+  "<fixture>/project/contextguard.yaml",
+  "--subject",
+  "orchestrator",
+  "--audit",
+  "<fixture>/audit-orchestrator.jsonl",
+]
+required = true
+default_tools_approval_mode = "approve"
+
+[mcp_servers.cg-worker]
+command = "node"
+args = [
+  "<repo>/dist/server.js",
+  "--policy",
+  "<fixture>/project/contextguard.yaml",
+  "--subject",
+  "worker",
+  "--audit",
+  "<fixture>/audit-worker.jsonl",
+]
+required = true
+default_tools_approval_mode = "approve"

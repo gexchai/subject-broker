@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a scoped improvement consistent with the threat model
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What concrete user or security problem should be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest useful solution.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security-boundary impact
+      description: Which threat-model assumptions, ADRs, capabilities, or non-goals would change?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Suggested validation
+      description: What tests or field controls would establish the new claim?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include simpler deployment or documentation alternatives.
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Submission checks
+      options:
+        - label: I reviewed the current threat model, decisions, and open questions.
+          required: true
+        - label: I searched existing issues for a similar proposal.
+          required: true

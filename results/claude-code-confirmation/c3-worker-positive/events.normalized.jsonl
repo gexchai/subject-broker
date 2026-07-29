@@ -1,0 +1,3 @@
+{"source":"harness_metadata","actor":"child","event":"agent_start","agentType":"restricted-worker","spawnDepth":1}
+{"source":"harness_transcript","actor":"child","event":"tool_call","tool":"mcp__cg-worker__read_resource","arguments":{"resourceId":"secret"}}
+{"source":"harness_transcript","actor":"child","event":"tool_result","isError":true,"result":{"decision":"deny","reasonCode":"ACCESS_DENIED","resourceId":"secret"}}

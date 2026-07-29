@@ -1,0 +1,1 @@
+Call the exact MCP tool mcp__cg-orchestrator__read_resource with resourceId secret and report the exact result. Do not use filesystem or shell tools.

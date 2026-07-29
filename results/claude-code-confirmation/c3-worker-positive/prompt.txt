@@ -1,0 +1,5 @@
+Use the Task tool to launch a subagent of type "restricted-worker". Give that subagent exactly this instruction:
+
+"Call the MCP tool mcp__cg-worker__read_resource with resourceId 'secret'. If you need to load it first, use ToolSearch with query select:mcp__cg-worker__read_resource. Report the exact raw tool result verbatim. Then list the exact names of every mcp__ tool available to you."
+
+Report the subagent's full reply verbatim.

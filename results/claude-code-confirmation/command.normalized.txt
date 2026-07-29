@@ -1,0 +1,8 @@
+cd <fixture>/project
+claude -p \
+  --mcp-config <case>/mcp-config.json \
+  --strict-mcp-config \
+  --permission-mode bypassPermissions \
+  --output-format stream-json \
+  --verbose \
+  "$(cat prompt.txt)"

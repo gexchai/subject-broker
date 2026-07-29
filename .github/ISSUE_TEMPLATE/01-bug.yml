@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a reproducible defect that is not a sensitive vulnerability
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, protected content, credentials, private transcripts, or exploit
+        details. Follow SECURITY.md for potential vulnerabilities.
+  - type: input
+    id: version
+    attributes:
+      label: SubjectBroker version
+      description: Commit SHA or release version.
+      placeholder: 0123456 or v0.1.0-alpha
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: macOS, Node.js, MCP client, and agent-harness versions.
+      placeholder: macOS 15.x, Node.js 22.x, Claude Code 2.x
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect, and which documented behavior supports that expectation?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use synthetic paths, policy, prompts, and content only.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Include only the smallest relevant, redacted output.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues.
+          required: true
+        - label: This report contains no real secrets, credentials, protected data, or private session metadata.
+          required: true
+        - label: This is not a vulnerability requiring private disclosure.
+          required: true

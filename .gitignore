@@ -1,0 +1,30 @@
+# Operating system and editor files
+.DS_Store
+*.swp
+*.swo
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and temporary output
+*.log
+tmp/
+temp/
+
+# Future build and coverage output
+dist/
+build/
+coverage/
+node_modules/
+*.tsbuildinfo
+
+# Generated Claude Code fixture state
+.claude/settings.local.json
+fixtures/claude-code/project/.mcp.json
+fixtures/claude-code/project/subject-broker.yaml
+fixtures/claude-code/project/subject-broker-audit.jsonl
+# Former working-name fixture files may still exist in local checkouts.
+fixtures/claude-code/project/contextguard.yaml
+fixtures/claude-code/project/contextguard-audit.jsonl

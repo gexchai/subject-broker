@@ -1,0 +1,1 @@
+Spawn exactly one default subagent. Tell that child to call the exact MCP tool mcp__cg-orchestrator__read_resource with resourceId secret. It must not substitute cg-worker or use filesystem or shell tools. The parent must not call any ContextGuard tool. Wait for the child and report whether that exact orchestrator tool was available.

@@ -1,0 +1,3 @@
+{"source":"harness_metadata","actor":"child","event":"agent_start","agentType":"restricted-worker","spawnDepth":1}
+{"source":"harness_transcript","actor":"child","event":"relevant_tool_use_count","toolPattern":"mcp__*","count":0}
+{"source":"broker_audit","actor":"cg-orchestrator","event":"read_resource_audit_count","count":0}
