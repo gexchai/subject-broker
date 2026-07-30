@@ -5,6 +5,8 @@ context broker。**
 
 [English](README.md) · [繁體中文](README.zh-TW.md) · 简体中文
 
+> 这是精简概览。完整安装、配置和操作说明请参阅 [English README](README.md)。
+
 当前 prototype 使用 MCP，但 authority model 本身不依赖特定 protocol。
 SubjectBroker 早期使用 **ContextGuard** 作为 working name；dated ADR 和保留的 field
 evidence 会维持旧名称，以免改写历史记录。
@@ -96,9 +98,12 @@ MCP client
 
 ## 五分钟演示
 
-需要：
+目前所有 security、integration 和 demo 验证均在 macOS 完成。在其他平台上，
+hard-enforcement path 和 demo 会以 `PLATFORM_UNSUPPORTED` fail closed，不会宣称未经
+验证的 security boundary。
 
-- macOS；
+运行当前 demo 需要安装：
+
 - Node.js 20 或更高版本；以及
 - npm。
 

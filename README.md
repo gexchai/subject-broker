@@ -1,27 +1,61 @@
 # SubjectBroker
 
-**An experimental subject-bound context broker with default-deny policy and fail-closed
-auditing.**
+[English](README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
-The current prototype speaks MCP; the authority model is protocol-independent. SubjectBroker
-was developed under the former working name **ContextGuard**. Dated architecture decisions and
-retained field evidence preserve that name where changing it would rewrite the historical
-record.
+[![CI](https://github.com/gexchai/subject-broker/actions/workflows/ci.yml/badge.svg)](https://github.com/gexchai/subject-broker/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-SubjectBroker binds one server process to one configured subject, evaluates default-deny read
-rules, and releases a registered resource only after an allow decision and a successful
-metadata-only audit write.
+**SubjectBroker helps different AI agents see different data—even when they work in the same
+project.**
+
+SubjectBroker is an experimental subject-bound context broker with default-deny policy and
+fail-closed auditing. The current prototype speaks the
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io/); the authority model is
+protocol-independent.
 
 > [!WARNING]
 > SubjectBroker is an experimental macOS research prototype, not a production security boundary
 > or an agent sandbox. An agent with direct filesystem, shell, network, browser, credential, or
 > process access can bypass the broker. Use OS-level isolation to close those paths.
 
+SubjectBroker is useful when multiple AI agents work against the same project and some registered
+data should be reachable by only some of them. It is not a replacement for a sandbox.
+
+Want to see it work first? [Jump to the quick start](#quick-start).
+
+## SubjectBroker in plain English
+
+Imagine several AI assistants working in the same environment. They should not automatically
+receive the same data.
+
+SubjectBroker places a controlled checkpoint in front of selected resources. Instead of asking
+for a filesystem path, an agent asks for a registered name such as `design-doc`. Each
+SubjectBroker process starts with a fixed subject, such as `orchestrator` or `worker`, and that
+subject cannot be changed by the request.
+
+For every brokered read, SubjectBroker checks a default-deny policy, verifies the registered
+file, and writes a metadata-only audit event. Content is returned only if every required step
+succeeds. A denied request—or an audit failure—returns no protected content.
+
+SubjectBroker is not limited conceptually to secrets: the context being controlled could
+represent a design document, customer record, knowledge source, or credential. The current
+prototype implements this model for registered UTF-8 text files.
+
+Three terms describe the model:
+
+- **Subject** — the AI identity making the request, such as `orchestrator` or `worker`.
+- **Resource** — registered data with a stable name, such as `design-doc`.
+- **Policy** — the rules deciding which subject may read which resource.
+
+For example, an `orchestrator` might be allowed to read `design-doc` but denied access to
+`customer-records`. A `worker` can have a different view of the same project because it is
+evaluated as a different subject.
+
 ## Why this exists
 
-Agent frameworks often delegate work without delegating less authority. If a parent can see both
-an orchestrator and worker MCP connection, a default child may inherit both and gain their
-combined authority.
+Agent frameworks often hand a subtask to a child agent while giving that child the parent's full
+authority. If a parent can see both an orchestrator and worker MCP connection, a default child
+may inherit both and gain their combined authority.
 
 ```text
 Unsafe: one context holds both subjects       Safer: one visible subject per context
@@ -39,30 +73,49 @@ SubjectBroker makes the MCP side of that boundary explicit:
 - allowed content is released only after audit succeeds; and
 - denial, error, and audit output exclude protected content.
 
-## Field-tested agent behavior
+### How the data path changes
 
-These are version-pinned integration results, not universal claims about future releases.
+SubjectBroker does not classify content or make decisions by topic. It changes how registered
+resources are requested: the agent asks for a stable resource ID, and the process-bound subject
+is evaluated before protected content can be returned.
 
-| Harness | Observed delegation behavior | Supported distinct-subject topology |
-| --- | --- | --- |
-| Claude Code 2.1.220 | Default subagents inherited parent MCP authority | Persistent named custom subagent with an explicit MCP `tools` allowlist |
-| Codex CLI 0.144.4 | Native children inherited parent MCP connections | Separate process and `CODEX_HOME`, with one subject connection per profile; tested through depth 2 |
-| Hermes Agent 0.19.0 | Native delegation inherited the profile's connections | Separate top-level process/profile per subject |
-| Pi 0.82.1 | No native subagent mechanism in the tested release | Separate single-subject process; direct-read enforcement still requires a sandbox |
+```mermaid
+flowchart TB
+    subgraph BEFORE["Before — agent reads data directly"]
+        A1["Agent"] -->|"Direct file access"| F1[("Protected data")]
+        F1 --> O1["Data reaches agent<br/>No SubjectBroker policy decision"]
+    end
 
-See the [Claude Code](docs/integration-claude-code.md),
-[Codex](docs/integration-codex.md), [Hermes](docs/integration-hermes.md), and
-[Pi](docs/integration-pi.md) integration notes for the exact boundaries.
+    subgraph AFTER["With SubjectBroker — access is brokered"]
+        A2["Agent"] -->|"Request a resource ID"| B["SubjectBroker"]
+        B --> P{"Policy allows<br/>this subject?"}
 
-## Five-minute demo
+        P -->|"Yes"| R["Verify file identity<br/>Read data + write audit"]
+        R --> O2["Data reaches agent"]
 
-Requirements:
+        P -->|"No"| D["Record denial<br/>No protected content"]
+        D --> O3["Agent receives<br/>ACCESS_DENIED"]
+    end
+```
 
-- macOS;
+An allow decision is not sufficient by itself: file verification, a bounded UTF-8 read, and the
+metadata-only audit write must all succeed before content is released. A denied read records the
+outcome and returns no protected bytes.
+
+## Quick start
+
+All current security, integration, and demo validation was performed on macOS. On other
+platforms, the enforced read path and demo fail closed with `PLATFORM_UNSUPPORTED` rather than
+claiming an unverified security boundary.
+
+To run the current demo, install:
+
 - Node.js 20 or newer; and
 - npm.
 
 ```bash
+git clone https://github.com/gexchai/subject-broker.git
+cd subject-broker
 npm ci
 npm run demo
 ```
@@ -82,26 +135,13 @@ The demo creates a temporary protected resource and one policy, then starts two 
 bound to different subjects. It cleans up its temporary files on exit. The integration test suite
 separately exercises the complete MCP stdio transport.
 
-Run all 51 unit, integration, and security tests:
+Run the full unit, integration, and security test suite:
 
 ```bash
 npm test
 ```
 
-## How the read path works
-
-```text
-MCP client
-   │ read_resource("contract")
-   ▼
-subject-bound SubjectBroker process
-   │
-   ├── evaluate explicit policy rule
-   ├── verify the registered file identity
-   ├── read bounded strict UTF-8 content
-   ├── append metadata-only audit event
-   └── release content only if every step succeeds
-```
+## Implemented safeguards
 
 The implemented macOS path includes:
 
@@ -113,6 +153,21 @@ The implemented macOS path includes:
 - fail-closed audit semantics;
 - non-sensitive denial and startup diagnostics; and
 - a capability report that names covered and uncovered paths.
+
+## Field-tested agent behavior
+
+These are version-pinned integration results, not universal claims about future releases.
+
+| Harness | Observed delegation behavior | Supported distinct-subject topology |
+| --- | --- | --- |
+| Claude Code 2.1.220 | Default subagents inherited parent MCP authority | Persistent named custom subagent with an explicit MCP `tools` allowlist |
+| Codex CLI 0.144.4 | Native children inherited parent MCP connections | Separate process and `CODEX_HOME`, with one subject connection per profile; tested through depth 2 |
+| Hermes Agent 0.19.0 | Native delegation inherited the profile's connections | Separate top-level process/profile per subject |
+| Pi 0.82.1 | No native subagent mechanism in the tested release | Separate single-subject process; direct-read enforcement still requires a sandbox |
+
+See the [Claude Code](docs/integration-claude-code.md),
+[Codex](docs/integration-codex.md), [Hermes](docs/integration-hermes.md), and
+[Pi](docs/integration-pi.md) integration notes for the exact boundaries.
 
 ## Run as an MCP server
 
@@ -165,8 +220,8 @@ The stdio server exposes exactly:
 Restart after an authorized resource replacement; a changed file identity returns
 `RESOURCE_CHANGED`.
 
-The audit destination must be a regular `0600` file and must not be a symlink. If validation or
-writing fails, content is not released.
+The audit destination must be a regular owner-only (`0600`) file and must not be a symlink. If
+validation or writing fails, content is not released.
 
 ## Detect cross-subject retries
 
@@ -222,6 +277,10 @@ hashes are retained for provenance.
 ## Project status
 
 Status: **experimental, working, attack-tested spike**.
+
+SubjectBroker was developed under the former working name **ContextGuard**. Dated architecture
+decisions and retained field evidence preserve that name where changing it would rewrite the
+historical record.
 
 The policy schema and behavior may change. Only entries marked `decided` in
 [DECISIONS.md](DECISIONS.md) describe deliberate choices for this spike. Before production use,
