@@ -158,6 +158,12 @@ The implemented macOS path includes:
 
 These are version-pinned integration results, not universal claims about future releases.
 
+![SubjectBroker delegation experiment showing the unsafe shared-context setup, the five test steps, and version-pinned observations for Claude Code, Codex CLI, Hermes Agent, and Pi.](docs/assets/delegation-inheritance-test.png)
+
+*Experiment setup and version-pinned observations showing that delegation did not automatically
+reduce visible SubjectBroker authority in the tested configurations. The table below provides
+the accessible text summary and links to the exact integration boundaries.*
+
 | Harness | Observed delegation behavior | Supported distinct-subject topology |
 | --- | --- | --- |
 | Claude Code 2.1.220 | Default subagents inherited parent MCP authority | Persistent named custom subagent with an explicit MCP `tools` allowlist |
