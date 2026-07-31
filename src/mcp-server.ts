@@ -3,6 +3,8 @@ import { z } from "zod";
 import type { SubjectBroker } from "./broker.js";
 import { SPIKE_VERSION } from "./capability.js";
 
+export const DEFAULT_MCP_SERVER_NAME = "subject-broker";
+
 function textResult<T extends object>(value: T, isError = false) {
   const structuredContent = value as Record<string, unknown>;
   return {
@@ -21,12 +23,15 @@ const explainInput = z.looseObject({
   action: z.string().default("read"),
 });
 
-export function createMcpServer(broker: SubjectBroker): McpServer {
+export function createMcpServer(
+  broker: SubjectBroker,
+  serverName = DEFAULT_MCP_SERVER_NAME,
+): McpServer {
   const subjectBoundary =
     `This connection is bound to subject "${broker.subjectId}". ` +
     "A denial must not be retried through another SubjectBroker connection.";
   const server = new McpServer({
-    name: "subject-broker",
+    name: serverName,
     version: SPIKE_VERSION,
   });
 

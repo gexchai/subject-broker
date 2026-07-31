@@ -211,6 +211,7 @@ Start one process for one subject:
 node dist/server.js \
   --policy /absolute/path/to/subject-broker.yaml \
   --subject worker \
+  --server-name sbWorker \
   --audit /absolute/path/to/subject-broker-worker-audit.jsonl \
   --max-bytes 1048576
 ```
@@ -221,6 +222,11 @@ The stdio server exposes exactly:
 - `read_resource`
 - `explain_decision`
 - `capability_report`
+
+`--server-name` sets the MCP implementation name reported to the host and defaults to
+`subject-broker`. Give concurrent subject-bound connections distinct names when a host uses the
+reported name in tool allowlists. This is a routing label only: `--subject`, not the server name,
+binds authority.
 
 `--max-bytes` defaults to 1 MiB. Policy and registered file identity are pinned at startup.
 Restart after an authorized resource replacement; a changed file identity returns

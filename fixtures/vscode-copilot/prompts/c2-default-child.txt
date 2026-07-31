@@ -1,0 +1,1 @@
+Using the SB Unrestricted Parent agent, run one ordinary unnamed/default inherited subagent without selecting any named custom agent. Instruct that child to call the exact `sbOrchestrator/read_resource` tool with `resourceId: secret` and return the exact result. The parent must not call either SubjectBroker connection. Wait for the child and report its result.

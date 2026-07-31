@@ -6,13 +6,14 @@ import {
   DEFAULT_MAX_RESOURCE_BYTES,
   StartupConfigurationError,
 } from "./broker.js";
-import { createMcpServer } from "./mcp-server.js";
+import { createMcpServer, DEFAULT_MCP_SERVER_NAME } from "./mcp-server.js";
 
 interface ServerArguments {
   readonly policyPath: string;
   readonly subjectId: string;
   readonly auditPath: string;
   readonly maxResourceBytes: number;
+  readonly serverName: string;
 }
 
 export type StartupArgumentErrorCode =
@@ -32,7 +33,13 @@ export class StartupArgumentError extends Error {
   }
 }
 
-const STARTUP_FLAGS = new Set(["--policy", "--subject", "--audit", "--max-bytes"]);
+const STARTUP_FLAGS = new Set([
+  "--policy",
+  "--subject",
+  "--audit",
+  "--max-bytes",
+  "--server-name",
+]);
 
 function parseFlags(args: readonly string[]): ReadonlyMap<string, string> {
   const values = new Map<string, string>();
@@ -63,6 +70,10 @@ export function parseServerArguments(
   const auditPath = values.get("--audit") ?? environment.SUBJECT_BROKER_AUDIT;
   const maximumInput =
     values.get("--max-bytes") ?? environment.SUBJECT_BROKER_MAX_RESOURCE_BYTES;
+  const serverName =
+    values.get("--server-name") ??
+    environment.SUBJECT_BROKER_SERVER_NAME ??
+    DEFAULT_MCP_SERVER_NAME;
 
   if (!policyPath || !subjectId || !auditPath) {
     throw new StartupArgumentError("MISSING_REQUIRED_ARGUMENT");
@@ -72,7 +83,7 @@ export function parseServerArguments(
   if (!Number.isSafeInteger(maxResourceBytes) || maxResourceBytes <= 0) {
     throw new StartupArgumentError("INVALID_MAX_RESOURCE_BYTES");
   }
-  return { policyPath, subjectId, auditPath, maxResourceBytes };
+  return { policyPath, subjectId, auditPath, maxResourceBytes, serverName };
 }
 
 export async function runServer(args: ServerArguments): Promise<void> {
@@ -86,7 +97,7 @@ export async function runServer(args: ServerArguments): Promise<void> {
       process.stderr.write(`SubjectBroker runtime diagnostic: ${code}\n`);
     },
   });
-  const server = createMcpServer(broker);
+  const server = createMcpServer(broker, args.serverName);
   await server.connect(new StdioServerTransport());
 }
 

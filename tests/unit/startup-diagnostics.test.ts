@@ -66,12 +66,12 @@ function expectArgumentFailure(
 
 describe("server startup diagnostics", () => {
   it("parses and validates the resource byte limit", () => {
-    expect(
-      parseServerArguments(
-        ["--policy", "/policy", "--subject", "agent", "--audit", "/audit"],
-        {},
-      ).maxResourceBytes,
-    ).toBe(1024 * 1024);
+    const defaults = parseServerArguments(
+      ["--policy", "/policy", "--subject", "agent", "--audit", "/audit"],
+      {},
+    );
+    expect(defaults.maxResourceBytes).toBe(1024 * 1024);
+    expect(defaults.serverName).toBe("subject-broker");
     expect(
       parseServerArguments(
         [
@@ -97,6 +97,30 @@ describe("server startup diagnostics", () => {
       "--max-bytes",
       "unbounded",
     ]);
+  });
+
+  it("accepts an instance-specific MCP server name from arguments or environment", () => {
+    expect(
+      parseServerArguments(
+        [
+          "--policy",
+          "/policy",
+          "--subject",
+          "agent",
+          "--audit",
+          "/audit",
+          "--server-name",
+          "sbWorker",
+        ],
+        {},
+      ).serverName,
+    ).toBe("sbWorker");
+    expect(
+      parseServerArguments(
+        ["--policy", "/policy", "--subject", "agent", "--audit", "/audit"],
+        { SUBJECT_BROKER_SERVER_NAME: "sbOrchestrator" },
+      ).serverName,
+    ).toBe("sbOrchestrator");
   });
 
   it("rejects missing, duplicate, and unknown arguments without consuming flags as values", () => {

@@ -13,7 +13,9 @@ afterEach(async () => {
   fixture = undefined;
 });
 
-async function connect(subjectId: string, fixtureValue: Fixture) {
+async function connect(subjectId: string, fixtureValue: Fixture, serverName?: string) {
+  const optionalServerName =
+    serverName === undefined ? [] : ["--server-name", serverName];
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [
@@ -26,6 +28,7 @@ async function connect(subjectId: string, fixtureValue: Fixture) {
       fixtureValue.auditPath,
       "--max-bytes",
       "1048576",
+      ...optionalServerName,
     ],
     cwd: fixtureValue.projectDir,
     stderr: "pipe",
@@ -39,8 +42,9 @@ describe("stdio MCP transport", () => {
   it("exposes exactly four tools and completes allow and deny flows end to end", async () => {
     fixture = await createFixture();
 
-    const allowed = await connect("allowed-agent", fixture);
+    const allowed = await connect("allowed-agent", fixture, "sbAllowed");
     try {
+      expect(allowed.client.getServerVersion()?.name).toBe("sbAllowed");
       const tools = await allowed.client.listTools();
       expect(tools.tools.map((tool) => tool.name).sort()).toEqual([
         "capability_report",

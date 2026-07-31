@@ -1,0 +1,1 @@
+Using the SB Parent agent, invoke SB Restricted Worker as exactly one subagent. Instruct it to call the exact `sbWorker/read_resource` tool with `resourceId: secret` and return the exact result. The parent must not call either SubjectBroker connection. Wait for the child and report its result.

@@ -1,0 +1,38 @@
+{
+  "servers": {
+    "sbOrchestrator": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/../../../dist/server.js",
+        "--policy",
+        "${workspaceFolder}/.runtime/subject-broker.yaml",
+        "--subject",
+        "orchestrator",
+        "--server-name",
+        "sbOrchestrator",
+        "--audit",
+        "${workspaceFolder}/.runtime/audit-orchestrator.jsonl",
+        "--max-bytes",
+        "1048576"
+      ]
+    },
+    "sbWorker": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/../../../dist/server.js",
+        "--policy",
+        "${workspaceFolder}/.runtime/subject-broker.yaml",
+        "--subject",
+        "worker",
+        "--server-name",
+        "sbWorker",
+        "--audit",
+        "${workspaceFolder}/.runtime/audit-worker.jsonl",
+        "--max-bytes",
+        "1048576"
+      ]
+    }
+  }
+}

@@ -181,3 +181,47 @@ read as a claim that extension-based delegation is impossible.
 
 Verified: `@earendil-works/pi-coding-agent` 0.82.1 shipped `dist/`, and
 `packages/coding-agent/README.md` line 497 plus `docs/usage.md` line 296 at the pinned commit.
+
+### VS Code local Copilot — attempted 2026-07-31 — result: **Blocked by host integration**
+
+An isolated workspace fixture and confirmation protocol are prepared. The candidate topology
+uses:
+
+- an `SB Direct Parent` with only `sbOrchestrator/read_resource` for the direct control;
+- a local `SB Parent` custom agent with `agent`, `sbOrchestrator/read_resource`, and
+  `sbWorker/read_resource`;
+- an `SB Restricted Worker` custom subagent with only `sbWorker/read_resource`;
+- separate broker processes and audit paths for `orchestrator` and `worker`;
+- exported Chat JSON and Agent Debug OTLP JSON as harness evidence.
+
+No enforcement conclusion follows from the configuration alone. The pinned run did not clear
+the first gate: a real parent allow.
+
+One initial C1 attempt was invalidated during setup: VS Code 1.130.0 grouped both processes under
+their shared reported MCP name `subject-broker`, so the configuration-key selectors matched no
+tools. No broker call occurred. The fixture now gives the two processes distinct reported names;
+the control must be repeated after Configure Tools verifies the corrected selectors.
+
+A subsequent C1 setup attempt was also invalidated because the delegation-capable parent ignored
+the prompt's no-delegation request and invoked the restricted worker. No broker call occurred.
+The fixture now uses a separate no-delegation direct-control agent for C1.
+
+The corrected no-delegation C1 then exposed a VS Code/Copilot integration blocker. Configure
+Tools temporarily showed the exact orchestrator read tool as selected, and the custom-agent
+frontmatter contained that selector. However, the retained Copilot request schema offered only
+the unrelated `session_store_sql` extension tool and no SubjectBroker MCP tool. Copilot reported
+the requested tool unavailable, and both broker audits stayed empty. Switching away from the
+custom agent and back reset Configure Tools to `0 Selected` while leaving the frontmatter
+unchanged.
+
+Version-pinned: VS Code 1.130.0, commit
+`1b6a188127eeaf9194f945eb6eb89a657e93c54c`, arm64; built-in GitHub Copilot extension 0.58.0;
+local target; Auto routed the attempted control to `mai-code-1-flash`.
+
+This does not classify Copilot subagent isolation. C2–C4 were deliberately not run because an
+absent child call is uninterpretable when the parent cannot receive the privileged MCP tool.
+Re-test only after a version can pass the C1 parent control with both Copilot debug-tool evidence
+and an orchestrator audit allow.
+
+See [the VS Code confirmation protocol](field-test-vscode-copilot-subagent-isolation.md) and
+[the prepared integration guide](integration-vscode-copilot.md).
