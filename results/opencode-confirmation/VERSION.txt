@@ -1,0 +1,6 @@
+OpenCode: 1.18.10
+Upstream tag commit: 7902e04c3a67f7c69726bc955efb46e29214c797
+Model: opencode/deepseek-v4-flash-free
+Command mode: run --pure --auto --format json
+Sharing: disabled
+Execution date: 2026-08-01

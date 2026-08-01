@@ -1,0 +1,3 @@
+{"actor":"parent","agent":"sb-nesting-parent","event":"delegate","child":"child","childAgent":"sb-nesting-worker"}
+{"actor":"child","agent":"sb-nesting-worker","parent":"parent","event":"delegate_rejected","requestedAgent":"sb-restricted-grandchild","error":"Subagent depth limit reached (1). Increase subagent_depth to allow nested subagents."}
+{"actor":"child","agent":"sb-nesting-worker","event":"relevant_mcp_call_count","sbWorker_read_resource":0,"sbOrchestrator_read_resource":0,"interpretation":"nested_path_not_exercised"}

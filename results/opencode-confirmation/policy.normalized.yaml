@@ -1,0 +1,17 @@
+version: 1
+storageRoot: <synthetic-protected-storage>
+subjects:
+  - orchestrator
+  - worker
+resources:
+  secret:
+    path: <synthetic-protected-storage>/secret.txt
+rules:
+  - subject: orchestrator
+    resource: secret
+    action: read
+    decision: allow
+  - subject: worker
+    resource: secret
+    action: read
+    decision: deny

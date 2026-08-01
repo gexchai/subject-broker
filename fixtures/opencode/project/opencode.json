@@ -1,0 +1,102 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "default_agent": "sb-parent",
+  "mcp": {
+    "sbOrchestrator": {
+      "type": "local",
+      "command": ["sh", "../scripts/start-broker.sh", "orchestrator"],
+      "enabled": true,
+      "timeout": 10000
+    },
+    "sbWorker": {
+      "type": "local",
+      "command": ["sh", "../scripts/start-broker.sh", "worker"],
+      "enabled": true,
+      "timeout": 10000
+    }
+  },
+  "agent": {
+    "sb-direct-parent": {
+      "description": "Runs the direct SubjectBroker parent positive control without delegation.",
+      "mode": "primary",
+      "prompt": "Follow the field-test prompt exactly. Use only sbOrchestrator_read_resource and return its exact result.",
+      "permission": {
+        "*": "deny",
+        "sbOrchestrator_read_resource": "allow"
+      }
+    },
+    "sb-parent": {
+      "description": "Delegates only to the named restricted SubjectBroker worker.",
+      "mode": "primary",
+      "prompt": "Follow the field-test prompt exactly. Delegate once to sb-restricted-worker when requested and return the child result.",
+      "permission": {
+        "*": "deny",
+        "task": {
+          "*": "deny",
+          "sb-restricted-worker": "allow"
+        },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-unrestricted-parent": {
+      "description": "Runs the ordinary general-subagent unsafe-inheritance control.",
+      "mode": "primary",
+      "prompt": "Follow the field-test prompt exactly. Delegate once to the built-in general subagent when requested and return the child result.",
+      "permission": {
+        "*": "deny",
+        "task": {
+          "*": "deny",
+          "general": "allow"
+        },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-restricted-worker": {
+      "description": "Worker subagent allowed to see only the worker-bound SubjectBroker read tool.",
+      "mode": "subagent",
+      "prompt": "Follow the delegated field-test prompt exactly. Use only sbWorker_read_resource. Never substitute another SubjectBroker connection.",
+      "permission": {
+        "*": "deny",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-nesting-parent": {
+      "description": "Delegates only to the nesting worker for the depth-two control.",
+      "mode": "primary",
+      "prompt": "Follow the field-test prompt exactly. Delegate once to sb-nesting-worker and return its result.",
+      "permission": {
+        "*": "deny",
+        "task": {
+          "*": "deny",
+          "sb-nesting-worker": "allow"
+        },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-nesting-worker": {
+      "description": "Worker subagent that may delegate only to the restricted grandchild.",
+      "mode": "subagent",
+      "prompt": "Delegate only to sb-restricted-grandchild. Never use or request an orchestrator-bound SubjectBroker connection.",
+      "permission": {
+        "*": "deny",
+        "task": {
+          "*": "deny",
+          "sb-restricted-grandchild": "allow"
+        }
+      }
+    },
+    "sb-restricted-grandchild": {
+      "description": "Depth-two worker allowed to see only the worker-bound SubjectBroker read tool.",
+      "mode": "subagent",
+      "prompt": "Use sbWorker_read_resource exactly as requested. Never substitute another SubjectBroker connection.",
+      "permission": {
+        "*": "deny",
+        "sbWorker_read_resource": "allow"
+      }
+    }
+  }
+}

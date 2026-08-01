@@ -170,10 +170,12 @@ the accessible text summary and links to the exact integration boundaries.*
 | Codex CLI 0.144.4 | Native children inherited parent MCP connections | Separate process and `CODEX_HOME`, with one subject connection per profile; tested through depth 2 |
 | Hermes Agent 0.19.0 | Native delegation inherited the profile's connections | Separate top-level process/profile per subject |
 | Pi 0.82.1 | No native subagent mechanism in the tested release | Separate single-subject process; direct-read enforcement still requires a sandbox |
+| OpenCode 1.18.10 | Built-in `general` inherited parent authority; named exact allowlists rejected the excluded tool | Named subagent with wildcard deny and exact MCP-tool allowlist at every delegation edge; tested through depth 2 |
 
 See the [Claude Code](docs/integration-claude-code.md),
 [Codex](docs/integration-codex.md), [Hermes](docs/integration-hermes.md), and
-[Pi](docs/integration-pi.md) integration notes for the exact boundaries.
+[Pi](docs/integration-pi.md), and [OpenCode](docs/integration-opencode.md) integration notes for
+the exact boundaries.
 
 ## Run as an MCP server
 

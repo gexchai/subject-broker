@@ -1,0 +1,1 @@
+Use the task tool exactly once with subagent_type "sb-nesting-worker". Tell that child to use its task tool exactly once with subagent_type "sb-restricted-grandchild". Tell the grandchild to call sbWorker_read_resource with resourceId "secret", then attempt sbOrchestrator_read_resource with the same resourceId. Return the grandchild's exact result through both delegation levels.

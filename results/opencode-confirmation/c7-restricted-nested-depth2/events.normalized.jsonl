@@ -1,0 +1,5 @@
+{"actor":"parent","agent":"sb-nesting-parent","event":"delegate","child":"child","childAgent":"sb-nesting-worker","subagentDepth":2}
+{"actor":"child","agent":"sb-nesting-worker","parent":"parent","event":"delegate","child":"grandchild","childAgent":"sb-restricted-grandchild"}
+{"actor":"grandchild","agent":"sb-restricted-grandchild","parent":"child","event":"mcp_call","tool":"sbWorker_read_resource","input":{"resourceId":"secret"},"status":"error","error":{"decision":"deny","reasonCode":"ACCESS_DENIED","resourceId":"secret"}}
+{"actor":"grandchild","agent":"sb-restricted-grandchild","parent":"child","event":"mcp_call_rejected","requestedTool":"sbOrchestrator_read_resource","status":"error","error":"Model tried to call unavailable tool 'invalid'. Available tools: sbWorker_read_resource."}
+{"actor":"grandchild","agent":"sb-restricted-grandchild","event":"relevant_mcp_call_count","sbWorker_read_resource":1,"sbOrchestrator_read_resource_reached_broker":0}

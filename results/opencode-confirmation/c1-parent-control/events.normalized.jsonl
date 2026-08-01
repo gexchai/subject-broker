@@ -1,0 +1,1 @@
+{"actor":"parent","agent":"sb-direct-parent","event":"mcp_call","tool":"sbOrchestrator_read_resource","input":{"resourceId":"secret"},"status":"completed","output":{"decision":"allow","reasonCode":"ALLOWED","resourceId":"secret","content":"OPENCODE_ISOLATION_CANARY_91d83a\n"}}

@@ -1,0 +1,3 @@
+{"actor":"parent","agent":"sb-parent","event":"delegate","child":"child","childAgent":"sb-restricted-worker"}
+{"actor":"child","agent":"sb-restricted-worker","parent":"parent","event":"mcp_call","tool":"sbWorker_read_resource","input":{"resourceId":"secret"},"status":"error","error":{"decision":"deny","reasonCode":"ACCESS_DENIED","resourceId":"secret"}}
+{"actor":"child","agent":"sb-restricted-worker","event":"relevant_mcp_call_count","sbWorker_read_resource":1,"sbOrchestrator_read_resource":0}

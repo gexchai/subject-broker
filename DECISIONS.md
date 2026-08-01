@@ -305,3 +305,26 @@ also allows later transports without renaming the authority model.
 
 **Evidence:** `package.json`, `README.md`, `src/server.ts`, `src/mcp-server.ts`,
 `docs/integration-claude-code.md`, and `results/README.md`.
+
+## ADR-024 — OpenCode distinct subjects require named exact tool allowlists
+
+**Decision:** Support distinct SubjectBroker subjects inside one OpenCode 1.18.10 project only
+through specifically named subagents whose permissions start with wildcard deny and then allow
+only the assigned subject's exact MCP tools. Every parent or intermediate child must also limit
+its `task` permission to the exact intended named child. Treat the built-in `general` subagent as
+having the parent's effective SubjectBroker authority.
+
+Apply the restriction at every delegation level. The tested result covers depths 1 and 2 only.
+Do not infer the same result for arbitrary depth, plugins, remote server mode, OpenCode 2.0 beta,
+future versions, or direct filesystem and shell paths.
+
+**Rationale:** The retained parent control proved the orchestrator connection was active. An
+unfiltered `general` child inherited and exercised it, returning the canary. Named restricted
+children exercised the worker connection and received the expected deny. At depth 2, a named
+grandchild attempted the exact excluded orchestrator tool; OpenCode rejected the call as
+unavailable and reported only the worker tool as available, while the orchestrator audit stayed
+empty. Version-pinned source review found denied-tool filtering before the model request and a
+second permission check at MCP execution.
+
+**Evidence:** `docs/field-test-opencode-subagent-isolation.md`,
+`docs/integration-opencode.md`, and `results/opencode-confirmation/`.

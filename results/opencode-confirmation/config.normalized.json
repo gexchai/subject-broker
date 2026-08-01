@@ -1,0 +1,59 @@
+{
+  "share": "disabled",
+  "mcpServers": {
+    "sbOrchestrator": { "subject": "orchestrator", "audit": "audit-orchestrator.jsonl" },
+    "sbWorker": { "subject": "worker", "audit": "audit-worker.jsonl" }
+  },
+  "agents": {
+    "sb-direct-parent": {
+      "mode": "primary",
+      "permission": { "*": "deny", "sbOrchestrator_read_resource": "allow" }
+    },
+    "sb-unrestricted-parent": {
+      "mode": "primary",
+      "permission": {
+        "*": "deny",
+        "task": { "*": "deny", "general": "allow" },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-parent": {
+      "mode": "primary",
+      "permission": {
+        "*": "deny",
+        "task": { "*": "deny", "sb-restricted-worker": "allow" },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-restricted-worker": {
+      "mode": "subagent",
+      "permission": { "*": "deny", "sbWorker_read_resource": "allow" }
+    },
+    "sb-nesting-parent": {
+      "mode": "primary",
+      "permission": {
+        "*": "deny",
+        "task": { "*": "deny", "sb-nesting-worker": "allow" },
+        "sbOrchestrator_read_resource": "allow",
+        "sbWorker_read_resource": "allow"
+      }
+    },
+    "sb-nesting-worker": {
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "task": { "*": "deny", "sb-restricted-grandchild": "allow" }
+      }
+    },
+    "sb-restricted-grandchild": {
+      "mode": "subagent",
+      "permission": { "*": "deny", "sbWorker_read_resource": "allow" }
+    }
+  },
+  "caseOverrides": {
+    "c6-restricted-nested": { "subagent_depth": 1 },
+    "c7-restricted-nested-depth2": { "subagent_depth": 2 }
+  }
+}

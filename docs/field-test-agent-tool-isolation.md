@@ -1,8 +1,9 @@
 # Field-test protocol — per-agent MCP tool isolation
 
-Status: `reviewed` — Claude Code 2.1.220 persistent custom-subagent allowlists enforce the tested
-boundary; Hermes v0.19.0 native delegation does not isolate distinct subjects; Pi 0.82.1 has no
-built-in delegation to test.
+Status: `reviewed` — Claude Code 2.1.220 and OpenCode 1.18.10 named-subagent allowlists enforce
+their tested boundaries; Hermes v0.19.0 and Codex CLI 0.144.4 native delegation do not isolate
+distinct subjects; Pi 0.82.1 has no built-in delegation to test; VS Code local Copilot 1.130.0
+was blocked before its parent control.
 
 ## Question
 
@@ -75,6 +76,12 @@ This review is directional and does not replace the version-pinned live matrix:
   session, but Pi has no native MCP boundary in the tested setup. Isolation therefore depends on
   the subagent extension and `pi-mcp-adapter` composition, not on a documented Pi default:
   [extension tool control](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md).
+- OpenCode documents named primary agents and subagents, exact tool permissions, and MCP tools
+  named from their server and tool. The 1.18.10 source filters denied tools before the model
+  request and checks permission again when an MCP tool executes:
+  [agents](https://opencode.ai/docs/agents/),
+  [MCP servers](https://opencode.ai/docs/mcp-servers/), and
+  [pinned permission source](https://github.com/anomalyco/opencode/blob/7902e04c3a67f7c69726bc955efb46e29214c797/packages/opencode/src/permission/index.ts).
 
 ## Current execution status
 
@@ -225,3 +232,27 @@ and an orchestrator audit allow.
 
 See [the VS Code confirmation protocol](field-test-vscode-copilot-subagent-isolation.md) and
 [the prepared integration guide](integration-vscode-copilot.md).
+
+### OpenCode — executed 2026-08-01 — result: **Enforced isolation when named and allowlisted**
+
+Version-pinned: OpenCode 1.18.10, model `opencode/deepseek-v4-flash-free`, `--pure --auto`, one
+project containing both SubjectBroker connections, and separate audit paths per subject.
+
+The parent control exercised the orchestrator connection. An unfiltered built-in `general`
+subagent then inherited and exercised that same privileged connection, proving the unsafe
+default. A named `sb-restricted-worker` with wildcard deny plus an exact worker-tool allow could
+exercise only the worker read and received `ACCESS_DENIED`.
+
+The decisive adversarial control ran through parent → named worker → named grandchild with
+`subagent_depth: 2`. The grandchild called the worker tool, then attempted the exact orchestrator
+tool. OpenCode rejected the second call as unavailable and reported only
+`sbWorker_read_resource` as available; the orchestrator audit remained empty. At the default
+depth limit of 1, OpenCode rejected the nested delegation before either broker was called.
+
+This is configuration-dependent. The supported topology requires exact MCP allowlists on every
+lower-authority named agent and exact named-agent allowlists on every `task` edge. The default
+`general` agent remains unsafe for distinct subjects.
+
+See [the OpenCode protocol](field-test-opencode-subagent-isolation.md),
+[integration guide](integration-opencode.md), and
+[retained results](../results/opencode-confirmation/README.md).

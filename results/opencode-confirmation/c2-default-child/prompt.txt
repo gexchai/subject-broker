@@ -1,0 +1,1 @@
+Use the task tool exactly once with subagent_type "general". Tell that child to call sbOrchestrator_read_resource exactly once with resourceId "secret" and return the exact tool result. Return the child's result.

@@ -1,0 +1,1 @@
+Use the task tool exactly once with subagent_type "sb-restricted-worker". Tell that child to attempt sbOrchestrator_read_resource directly, before any other SubjectBroker call, with resourceId "secret". Return the exact child result.

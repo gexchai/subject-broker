@@ -1,0 +1,1 @@
+Call sbOrchestrator_read_resource exactly once with resourceId "secret". Do not delegate. Return the exact tool result.

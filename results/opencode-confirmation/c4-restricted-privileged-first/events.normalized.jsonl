@@ -1,0 +1,2 @@
+{"actor":"parent","agent":"sb-parent","event":"delegate","child":"child","childAgent":"sb-restricted-worker"}
+{"actor":"child","agent":"sb-restricted-worker","parent":"parent","event":"relevant_mcp_call_count","sbWorker_read_resource":0,"sbOrchestrator_read_resource":0,"interpretation":"supporting_only_model_refusal_shaped"}
