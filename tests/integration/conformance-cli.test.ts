@@ -21,7 +21,7 @@ describe("finance/support conformance command", () => {
     expect(stderr).toBe("");
     expect(report).toMatchObject({
       schemaVersion: 1,
-      subjectBrokerVersion: "0.1.0",
+      subjectBrokerVersion: "0.2.0",
       fixture: "finance-support",
       platform: "darwin",
       status: "pass",

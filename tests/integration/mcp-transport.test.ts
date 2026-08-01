@@ -62,7 +62,7 @@ describe("stdio MCP transport", () => {
         await allowed.client.callTool({ name: "capability_report", arguments: {} }),
       );
       expect(capability).toMatchObject({
-        version: "0.1.0",
+        version: "0.2.0",
         platform: "darwin",
         activeEnforcementLevel: "hard-enforcement",
         coveredOperation: "read_resource for registered resources through this MCP process",

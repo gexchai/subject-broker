@@ -1,6 +1,6 @@
 import type { CapabilityReport } from "./model.js";
 
-export const SUBJECT_BROKER_VERSION = "0.1.0";
+export const SUBJECT_BROKER_VERSION = "0.2.0";
 
 export function createCapabilityReport(
   platform: NodeJS.Platform,

@@ -9,7 +9,8 @@ There is no production-supported release.
 
 | Version | Security updates |
 | --- | --- |
-| `v0.1.0` and current `main` | Best-effort fixes for the documented research scope |
+| `v0.2.0` and current `main` | Best-effort fixes for the documented research scope |
+| `v0.1.0` | Superseded; retained as the initial research snapshot |
 | Older commits or snapshots | Not supported |
 
 The tested platform is macOS. See the [threat model](THREAT_MODEL.md) and

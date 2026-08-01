@@ -30,7 +30,7 @@ describe("capability report", () => {
           "copies already present in prompts, logs, caches, indexes, or prior allowed responses",
           "provider retention or downstream use after content is released",
         ],
-        "version": "0.1.0",
+        "version": "0.2.0",
       }
     `);
   });
