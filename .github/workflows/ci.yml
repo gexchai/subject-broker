@@ -35,6 +35,9 @@ jobs:
       - name: Run subject-bound demo
         run: npm run demo
 
+      - name: Run finance/support conformance proof
+        run: npm run --silent conformance
+
       - name: Run test suite
         run: npm test
 

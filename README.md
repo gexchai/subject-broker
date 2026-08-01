@@ -141,6 +141,21 @@ Run the full unit, integration, and security test suite:
 npm test
 ```
 
+Run the deterministic finance/support boundary proof:
+
+```bash
+npm run --silent conformance
+```
+
+The command emits a schema-versioned JSON report. It directly calls the MCP tools without a
+model, proves the tested SubjectBroker-layer allow and deny properties, and explicitly reports
+agent-harness connection isolation, direct host access, and non-transferable identity as
+`not-provided`.
+
+See the [security-boundary definition](docs/security-boundary.md) and
+[finance/support reference slice](examples/finance-support/README.md) before interpreting an
+overall `pass`. It is a broker conformance result, not a whole-agent security certification.
+
 ## Implemented safeguards
 
 The implemented macOS path includes:
@@ -174,7 +189,7 @@ provides the accessible text summary and links to the exact integration boundari
 | OpenCode 1.18.10 | Built-in `general` inherited parent authority; named exact allowlists rejected the excluded tool | Named subagent with wildcard deny and exact MCP-tool allowlist at every delegation edge; tested through depth 2 |
 
 See the [Claude Code](docs/integration-claude-code.md),
-[Codex](docs/integration-codex.md), [Hermes](docs/integration-hermes.md), and
+[Codex](docs/integration-codex.md), [Hermes](docs/integration-hermes.md),
 [Pi](docs/integration-pi.md), and [OpenCode](docs/integration-opencode.md) integration notes for
 the exact boundaries.
 

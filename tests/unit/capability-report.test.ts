@@ -1,5 +1,9 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { createCapabilityReport } from "../../src/capability.js";
+import {
+  createCapabilityReport,
+  SUBJECT_BROKER_VERSION,
+} from "../../src/capability.js";
 
 describe("capability report", () => {
   it("scopes hard enforcement to the macOS broker read and names uncovered paths", () => {
@@ -26,7 +30,7 @@ describe("capability report", () => {
           "copies already present in prompts, logs, caches, indexes, or prior allowed responses",
           "provider retention or downstream use after content is released",
         ],
-        "version": "0.1.0-spike",
+        "version": "0.1.0",
       }
     `);
   });
@@ -37,5 +41,12 @@ describe("capability report", () => {
 
   it("does not claim active enforcement when policy is unavailable", () => {
     expect(createCapabilityReport("darwin", false).activeEnforcementLevel).toBe("unsupported");
+  });
+
+  it("keeps the reported server version aligned with package metadata", async () => {
+    const packageMetadata = JSON.parse(await readFile("package.json", "utf8")) as {
+      version?: string;
+    };
+    expect(SUBJECT_BROKER_VERSION).toBe(packageMetadata.version);
   });
 });

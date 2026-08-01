@@ -78,6 +78,24 @@ MCP client
 - denial、error、diagnostic 和 audit 不包含受保護內容；以及
 - 明確列出涵蓋及未涵蓋路徑的 capability report。
 
+## 執行邊界一致性測試
+
+在 macOS 上執行：
+
+```bash
+npm ci
+npm run --silent conformance
+```
+
+此命令會執行一個不依賴模型的 finance/support MCP 情境，並輸出帶 schema version 的
+JSON 報告。它驗證 SubjectBroker 層的允許、拒絕、隱藏資源直接呼叫、身份偽造及
+metadata-only audit；同時明確把 agent harness 的連線隔離、host 直接存取及不可轉移
+身份標記為 `not-provided`。
+
+整體 `pass` 只代表已測試的 Broker 路徑通過，不代表完整 Agent sandbox。詳見
+[安全邊界說明](docs/security-boundary.md)及
+[finance/support 範例](examples/finance-support/README.md)。
+
 ## 實際測試過的 Agent 行為
 
 以下結果都綁定到特定版本，不代表未來版本一定維持相同行為。

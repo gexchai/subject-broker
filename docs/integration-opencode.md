@@ -76,3 +76,29 @@ worker positive control and privileged-tool rejection at the grandchild.
 See ADR-018, ADR-024,
 [the field-test protocol](field-test-opencode-subagent-isolation.md), and
 [the retained results](../results/opencode-confirmation/README.md).
+
+## Single-subject reference launcher
+
+The finance/support example includes a conservative launcher for one top-level OpenCode process:
+
+```bash
+examples/finance-support/scripts/prepare.sh
+
+OPENCODE_BIN=/absolute/path/to/opencode \
+  examples/finance-support/scripts/launch-opencode.sh finance-agent
+```
+
+The launcher uses a temporary OpenCode config home and inline configuration, then inspects the
+fully resolved config before starting the session. It fails with
+`OPENCODE_PROFILE_NOT_ISOLATED` if the MCP union contains anything other than the one generated
+subject-bound connection. Sharing and external plugins are disabled, and the generated default
+agent begins with wildcard deny plus exact allows for that connection's four SubjectBroker tools.
+
+OpenCode merges remote, global, project, inline, and managed configuration sources, as described
+in its [official configuration precedence](https://opencode.ai/docs/config/). Supplying an inline
+MCP entry without checking the resolved union is therefore not an isolation control. The launcher
+preflight addresses that configuration failure mode for the tested profile; it is not an OS
+sandbox and does not protect same-user files, processes, environments, or credentials.
+
+See [the finance/support reference slice](../examples/finance-support/README.md), ADR-025, and
+ADR-026.

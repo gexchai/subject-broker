@@ -328,3 +328,44 @@ second permission check at MCP execution.
 
 **Evidence:** `docs/field-test-opencode-subagent-isolation.md`,
 `docs/integration-opencode.md`, and `results/opencode-confirmation/`.
+
+## ADR-025 — Separate broker, harness, and host enforcement claims
+
+**Decision:** Describe SubjectBroker authorization, agent-harness connection visibility, and
+host/workload isolation as three independent enforcement layers. A passing broker read test must
+not be presented as proof that a harness withheld another subject's connection or that the host
+blocked direct access. Machine-readable reports must identify the layer for every check and may
+report uncovered layers as `not-provided` without converting them into a false failure or pass.
+
+Do not claim that a server can distinguish parent and child after both receive the same valid
+bearer credential unless a trusted non-transferable subject signal also exists. Credential or
+connection identifiers are audit metadata, not identity proof.
+
+**Rationale:** Field evidence established that correct per-process broker decisions can coexist
+with unsafe connection inheritance. Conversely, a tool-visibility pass does not close direct
+same-user access. Keeping these claims separate prevents a future credential or adapter feature
+from overstating the boundary.
+
+**Evidence:** `docs/security-boundary.md`, `THREAT_MODEL.md`, and
+`src/conformance.ts`.
+
+## ADR-026 — Deterministic conformance before broader protocol scope
+
+**Decision:** Keep the next vertical slice inside the registered-resource model. Provide a
+model-free finance/support conformance command that exercises MCP calls directly and emits a
+schema-versioned JSON report. Include parent authority, per-subject listings, direct calls to
+known unauthorized identifiers, request identity spoofing, subject-specific authority, and
+metadata-only audit evidence.
+
+Provide OpenCode 1.18.10 as the first reference launcher. Generate a temporary single-subject
+profile, resolve it through OpenCode before launch, and abort if any additional MCP connection is
+present. Treat this as an adapter control, not a broker or OS guarantee. Do not add generic
+upstream MCP tool proxying, OAuth, credential IDs, or IAM policy features in this milestone.
+
+**Rationale:** Most server-side properties already exist as separate tests. Packaging them into
+one adversarial report proves the current technical claim and exposes uncovered layers without
+prematurely pivoting SubjectBroker into a general authorization gateway.
+
+**Evidence:** `src/conformance.ts`, `tests/integration/conformance-cli.test.ts`,
+`src/opencode-adapter.ts`, `tests/unit/opencode-adapter.test.ts`, and
+`examples/finance-support/`.

@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { SubjectBroker } from "./broker.js";
-import { SPIKE_VERSION } from "./capability.js";
+import { SUBJECT_BROKER_VERSION } from "./capability.js";
 
 export const DEFAULT_MCP_SERVER_NAME = "subject-broker";
 
@@ -32,7 +32,7 @@ export function createMcpServer(
     "A denial must not be retried through another SubjectBroker connection.";
   const server = new McpServer({
     name: serverName,
-    version: SPIKE_VERSION,
+    version: SUBJECT_BROKER_VERSION,
   });
 
   server.registerTool(

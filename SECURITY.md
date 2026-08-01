@@ -9,7 +9,7 @@ There is no production-supported release.
 
 | Version | Security updates |
 | --- | --- |
-| Current `main` / latest pre-release | Best-effort fixes for the documented research scope |
+| `v0.1.0` and current `main` | Best-effort fixes for the documented research scope |
 | Older commits or snapshots | Not supported |
 
 The tested platform is macOS. See the [threat model](THREAT_MODEL.md) and
@@ -58,8 +58,8 @@ The following are documented limitations, not new broker vulnerabilities by them
 - direct filesystem, shell, network, clipboard, browser, credential, or process access;
 - absence of OS-level sandboxing or mandatory routing through SubjectBroker;
 - a third-party harness exposing multiple subject-bound connections to one agent context;
-- version-pinned Claude Code, Codex, Hermes, or Pi behavior already recorded in the integration
-  guides;
+- version-pinned Claude Code, Codex, Hermes, Pi, OpenCode, or VS Code behavior already recorded
+  in the integration guides;
 - denial-of-service through resources unavailable to the local operating-system user;
 - unsupported non-macOS hard-enforcement claims; and
 - social-engineering or prompt-injection reports that do not bypass a documented technical

@@ -26,6 +26,7 @@ Requirements:
 ```bash
 npm ci
 npm run demo
+npm run --silent conformance
 npm test
 ```
 
@@ -80,6 +81,7 @@ Before opening a pull request:
 
 ```bash
 npm run demo
+npm run --silent conformance
 npm test
 npm audit --omit=dev
 ```
@@ -97,9 +99,10 @@ A pull request should explain:
 
 Small, reviewable pull requests are preferred.
 
-GitHub Actions repeats the demo, test suite, and high-severity production dependency audit on a
-clean macOS runner for every pull request and push to `main`. A green workflow is required
-evidence that the change does not depend only on local machine state.
+GitHub Actions repeats the demo, finance/support conformance proof, test suite, and high-severity
+production dependency audit on a clean macOS runner for every pull request and push to `main`.
+A green workflow is required evidence that the change does not depend only on local machine
+state.
 
 ## License
 

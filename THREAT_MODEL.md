@@ -72,6 +72,11 @@ harness-level isolation. This invariant is supported by field evidence in
 [docs/field-evidence-2026-07-28.md](docs/field-evidence-2026-07-28.md), finding FE-01, and
 recorded in ADR-018.
 
+The project now records the broker, harness, and host layers separately. A broker-layer `pass`
+means only that the subject-bound registered-resource operation enforced its policy. It does not
+upgrade harness connection assignment or same-user host access into covered paths. See ADR-025
+and [`docs/security-boundary.md`](docs/security-boundary.md).
+
 Hermes Agent v0.19.0 native delegation cannot satisfy this invariant when parent and child need
 different subjects: a delegated child inherits the parent's visible MCP connections in the
 tested topology. Use separate top-level Hermes processes and profiles for distinct subjects.
@@ -114,6 +119,9 @@ worker-only profile was verified through delegation depths 1 and 2. See ADR-022,
   tested; arbitrary depth and future spawn surfaces with a custom-agent selector remain
   unclassified.
 - Runtime and dependency vulnerabilities may invalidate tested assumptions.
+- A bearer credential, if introduced later, would carry its authority to any child that receives
+  the same credential. Credential or connection IDs alone would improve attribution but would not
+  create non-transferable subject identity.
 - File identity checks do not prove that file contents were never modified in place.
 - Authorized rename-replacement updates require a broker restart because file identity is pinned
   for the process lifetime.

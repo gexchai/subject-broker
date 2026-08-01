@@ -1,6 +1,6 @@
 import type { CapabilityReport } from "./model.js";
 
-export const SPIKE_VERSION = "0.1.0-spike";
+export const SUBJECT_BROKER_VERSION = "0.1.0";
 
 export function createCapabilityReport(
   platform: NodeJS.Platform,
@@ -8,7 +8,7 @@ export function createCapabilityReport(
 ): CapabilityReport {
   const supported = platform === "darwin" && policyLoaded;
   return {
-    version: SPIKE_VERSION,
+    version: SUBJECT_BROKER_VERSION,
     platform,
     activeEnforcementLevel: supported ? "hard-enforcement" : "unsupported",
     coveredOperation: "read_resource for registered resources through this MCP process",
