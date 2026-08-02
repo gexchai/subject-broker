@@ -1,7 +1,7 @@
 # SubjectBroker security boundary
 
-Status: `implemented` for the v0.1 registered-resource MCP path; this document defines the
-boundary carried into the v0.2 conformance work.
+Status: `implemented` for the broker path and `experimental` for the version-pinned macOS
+host-isolated reference topology.
 
 SubjectBroker has one hard-enforcement claim: on the tested macOS path, a subject-bound broker
 process releases a registered UTF-8 resource only when its policy, file-identity, bounded-read,
@@ -15,7 +15,7 @@ That claim must not be confused with agent-harness or host isolation.
 | --- | --- | --- |
 | SubjectBroker | Whether the process-bound subject may read one registered resource | Enforced and covered by deterministic tests |
 | Agent harness | Which subject-bound MCP connections and tools an agent context can discover or invoke | Harness-dependent; version-pinned field results only |
-| Host / workload | Whether an agent can read storage or obtain another subject's configuration outside MCP | Not provided |
+| Host / workload | Whether an agent can read storage or obtain another subject's configuration outside MCP | Direct registered-storage path denied only in the experimental macOS reference profile; otherwise not provided |
 
 ```text
 agent context
@@ -65,6 +65,26 @@ The report deliberately returns `not-provided` for harness connection isolation,
 access, and non-transferable subject credentials. Overall `pass` means every tested
 SubjectBroker-layer check passed; it is not a whole-agent security certification.
 
+## Experimental host conformance claim
+
+`npm run --silent conformance:host` runs a second model-free differential on macOS. It starts the
+subject-bound broker outside a generated sandbox and runs the probe inside that sandbox. The
+report establishes that, in this exact topology:
+
+- direct reads of the dedicated trust root fail;
+- a workspace symlink to a registered file does not bypass that denial;
+- registered files with pre-existing hard links are rejected, and creating a new hard link from
+  inside the sandbox fails;
+- policy and audit files are unavailable to the sandboxed workload;
+- the assigned external broker socket still returns the authorized registered resource;
+- the same socket denies a known unauthorized resource; and
+- the resulting audit remains subject-aware and metadata-only.
+
+Its enforcement-level object keeps `agentHarness` as `not-exercised` and `subjectIdentity` as
+`not-provided`. The socket is a bearer capability, and Apple documents `sandbox-exec` as
+deprecated. A `pass` is therefore version-pinned evidence for the direct-resource differential,
+not a portable sandbox or workload-identity certification.
+
 ## OpenCode reference profile
 
 The OpenCode adapter creates a temporary config home, injects exactly one subject-bound MCP
@@ -72,9 +92,12 @@ connection, disables sharing and external plugins, and checks the fully resolved
 with `opencode debug config` before launch. It fails closed if another MCP connection remains in
 the resolved union.
 
-This reduces configuration accidents for the tested OpenCode path. It remains an adapter-level
-control and does not provide OS sandboxing, protect same-user credentials, or convert an arbitrary
-existing OpenCode project into a trusted workload identity.
+The experimental isolated launcher goes further: it keeps the broker outside the sandbox and
+replaces the local broker command with a stdio-to-Unix-socket relay. Policy, storage, and audit
+must share a dedicated trust root outside the workspace, and the sandbox denies all reads and
+writes under that root. Registered resources must have link count exactly one. The launcher still
+does not protect arbitrary credentials or processes,
+provide non-transferable identity, or convert `sandbox-exec` into a supported production API.
 
-See ADR-018, ADR-025, ADR-026, [`THREAT_MODEL.md`](../THREAT_MODEL.md), and the
+See ADR-018, ADR-025, ADR-026, ADR-027, [`THREAT_MODEL.md`](../THREAT_MODEL.md), and the
 [finance/support reference slice](../examples/finance-support/README.md).

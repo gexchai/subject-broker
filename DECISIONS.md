@@ -369,3 +369,43 @@ prematurely pivoting SubjectBroker into a general authorization gateway.
 **Evidence:** `src/conformance.ts`, `tests/integration/conformance-cli.test.ts`,
 `src/opencode-adapter.ts`, `tests/unit/opencode-adapter.test.ts`, and
 `examples/finance-support/`.
+
+## ADR-027 — Experimental macOS host-isolated reference topology
+
+**Decision:** Add a version-pinned macOS reference launcher that starts the subject-bound broker
+outside the agent sandbox, exposes that already-bound authority through an owner-only Unix
+socket, and runs OpenCode inside a generated `sandbox-exec` profile. The sandboxed OpenCode MCP
+command is a content-agnostic stdio-to-socket relay; it receives the assigned socket path but not
+the policy, audit, storage, or subject startup arguments.
+
+Require policy, registered storage, and audit destination to share one dedicated trust root that
+does not contain the agent workspace. Deny the sandboxed workload all file reads and writes under
+that trust root. Require every registered resource to be a regular file with link count exactly
+one so a pre-existing hard-link alias cannot bypass path-based sandbox rules. Fail closed if the
+topology, file identity, macOS host mechanism, or fully resolved single-connection OpenCode
+profile is unavailable. Keep the existing unsandboxed adapter as an explicit broker-path-only
+option.
+
+Report enforcement by layer. The deterministic host report may mark the tested broker and direct
+host-resource paths as `enforced`, while marking the agent harness as `not-exercised` and
+non-transferable subject identity as `not-provided`. Do not upgrade the broker's own capability
+report based on an external launcher it cannot attest.
+
+**Rationale:** Applying one sandbox to both OpenCode and its stdio broker would deny the broker's
+legitimate storage access. Moving only the broker outside the sandbox creates a testable
+differential: the workload cannot open the file, including through a workspace symlink, while
+the process-bound broker can still release an authorized resource and deny an unauthorized one.
+Protecting the entire trust root also prevents ancestor-directory mutation from bypassing
+individual file rules.
+
+`sandbox-exec` is deprecated by Apple, is not a stable portable production interface, and does
+not create non-transferable identity. The Unix socket remains a local bearer capability. This
+reference excludes compromised same-user processes, inherited pre-opened descriptors, arbitrary
+other sensitive paths, credential isolation, network isolation, and future macOS behavior unless
+retested.
+
+**Evidence:** `src/isolated-opencode.ts`, `src/socket-broker.ts`,
+`src/unix-socket-transport.ts`, `src/host-conformance.ts`,
+`tests/security/isolated-opencode.test.ts`, `tests/integration/host-isolation.test.ts`,
+`tests/integration/socket-transport.test.ts`, and
+`tests/integration/host-conformance-cli.test.ts`.

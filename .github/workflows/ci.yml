@@ -38,6 +38,9 @@ jobs:
       - name: Run finance/support conformance proof
         run: npm run --silent conformance
 
+      - name: Run macOS host-isolation differential
+        run: npm run --silent conformance:host
+
       - name: Run test suite
         run: npm test
 

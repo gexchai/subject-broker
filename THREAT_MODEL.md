@@ -42,9 +42,21 @@ For the tested macOS MCP broker path:
 
 Each guarantee is limited to behavior exercised by a named test in `DECISIONS.md`.
 
+For the experimental macOS host-isolated reference topology only:
+
+- the agent workspace is outside a dedicated trust root containing policy, storage, and audit;
+- the sandboxed workload cannot read or write that trust root directly;
+- a workspace symlink does not bypass the tested registered-resource denial; and
+- registered resources with pre-existing hard links are rejected, while creating a new hard link
+  from the sandbox is denied; and
+- the external, process-bound broker remains reachable through only the generated relay command.
+
+These additional guarantees are limited to ADR-027 and its version-pinned differential tests.
+
 ## Explicitly out of scope
 
-- An agent with unrestricted shell or filesystem access reading the protected file directly.
+- Direct reads outside the ADR-027 reference topology, or of paths outside its dedicated trust
+  root.
 - A same-user process launching another broker with a different subject, policy, or audit
   destination.
 - A compromised host, kernel, administrator account, Node.js runtime, or SubjectBroker process.
@@ -55,9 +67,15 @@ Each guarantee is limited to behavior exercised by a named test in `DECISIONS.md
 
 ## Direct-read path
 
-SubjectBroker does not close the direct-read path. A directory mode of `0700` excludes other operating-system users, but it does not isolate an agent running as the same user.
+The broker alone does not close the direct-read path. A directory mode of `0700` excludes other
+operating-system users, but it does not isolate an agent running as the same user.
 
-OS-level sandboxing or an equivalent privilege boundary is the only control that can close that path. SubjectBroker is complementary to such isolation and must not be presented as its replacement.
+ADR-027 adds one experimental macOS pairing in which the broker stays outside a generated
+`sandbox-exec` profile and the workload is denied access to the dedicated trust root. The
+model-free differential proves that direct and symlink-aliased reads fail while an authorized
+broker read succeeds. Apple marks `sandbox-exec` deprecated, so this result is not a portable or
+production-supported sandbox claim. SubjectBroker remains complementary to host isolation and
+must not be presented as its replacement in other topologies.
 
 ## Deployment invariant
 
@@ -97,7 +115,13 @@ worker-only profile was verified through delegation depths 1 and 2. See ADR-022,
 
 ## Residual risks
 
-- Same-user agents may bypass the broker through direct filesystem access.
+- Same-user agents may bypass the broker through direct filesystem access outside the exact
+  ADR-027 reference topology or against paths not placed under its dedicated trust root.
+- The ADR-027 Unix socket is a local bearer capability, not non-transferable identity. Another
+  accessible subject socket would add its authority to the workload.
+- Apple deprecates `sandbox-exec`; future macOS releases may change or remove the tested host
+  mechanism, and the profile does not isolate arbitrary credentials, network destinations, or
+  same-user processes.
 - Resource metadata may reveal identifiers even when content is denied.
 - Audit JSONL is append-only by application behavior, not tamper-evident against the project owner.
 - Audit destinations are required to be regular `0600` files. Whole-path symlink rejection does

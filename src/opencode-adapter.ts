@@ -140,6 +140,7 @@ export function buildOpenCodeSubjectProfile(
     "subjectId" | "policyPath" | "auditPath" | "serverName"
   >,
   serverExecutable = fileURLToPath(new URL("server.js", import.meta.url)),
+  serverCommand?: readonly string[],
 ): OpenCodeSubjectProfile {
   const toolPermission = {
     "*": "deny" as const,
@@ -157,20 +158,23 @@ export function buildOpenCodeSubjectProfile(
     mcp: {
       [args.serverName]: {
         type: "local",
-        command: [
-          process.execPath,
-          serverExecutable,
-          "--policy",
-          args.policyPath,
-          "--subject",
-          args.subjectId,
-          "--audit",
-          args.auditPath,
-          "--server-name",
-          args.serverName,
-          "--max-bytes",
-          "1048576",
-        ],
+        command:
+          serverCommand === undefined
+            ? [
+                process.execPath,
+                serverExecutable,
+                "--policy",
+                args.policyPath,
+                "--subject",
+                args.subjectId,
+                "--audit",
+                args.auditPath,
+                "--server-name",
+                args.serverName,
+                "--max-bytes",
+                "1048576",
+              ]
+            : [...serverCommand],
         enabled: true,
         timeout: 10000,
       },
@@ -258,7 +262,7 @@ async function assertWorkspace(workspace: string): Promise<void> {
   }
 }
 
-async function runChild(
+export async function runChild(
   executable: string,
   args: readonly string[],
   options: { readonly cwd: string; readonly env: NodeJS.ProcessEnv },
@@ -278,6 +282,43 @@ async function runChild(
   });
 }
 
+export async function preflightOpenCodeSubject(
+  args: OpenCodeAdapterArguments,
+  profile: OpenCodeSubjectProfile,
+  configHome: string,
+  baseEnvironment: NodeJS.ProcessEnv = process.env,
+): Promise<NodeJS.ProcessEnv> {
+  const environment: NodeJS.ProcessEnv = {
+    ...baseEnvironment,
+    XDG_CONFIG_HOME: configHome,
+    OPENCODE_CONFIG_CONTENT: JSON.stringify(profile),
+  };
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync(
+      args.opencodeExecutable,
+      ["debug", "config", "--pure"],
+      { cwd: args.workspace, env: environment, encoding: "utf8" },
+    ));
+  } catch (error) {
+    throw new OpenCodeAdapterError(
+      (error as NodeJS.ErrnoException | undefined)?.code === "ENOENT"
+        ? "OPENCODE_EXECUTABLE_UNAVAILABLE"
+        : "OPENCODE_PROFILE_NOT_ISOLATED",
+    );
+  }
+  let resolved: unknown;
+  try {
+    resolved = JSON.parse(stdout);
+  } catch {
+    throw new OpenCodeAdapterError("OPENCODE_PROFILE_NOT_ISOLATED");
+  }
+  if (!resolvedProfileIsIsolated(resolved, profile)) {
+    throw new OpenCodeAdapterError("OPENCODE_PROFILE_NOT_ISOLATED");
+  }
+  return environment;
+}
+
 export async function runOpenCodeSubject(
   args: OpenCodeAdapterArguments,
 ): Promise<number> {
@@ -289,34 +330,11 @@ export async function runOpenCodeSubject(
     const configHome = path.join(temporaryRoot, "config");
     await mkdir(configHome, { mode: 0o700 });
     const profile = buildOpenCodeSubjectProfile(args);
-    const environment: NodeJS.ProcessEnv = {
-      ...process.env,
-      XDG_CONFIG_HOME: configHome,
-      OPENCODE_CONFIG_CONTENT: JSON.stringify(profile),
-    };
-    let stdout: string;
-    try {
-      ({ stdout } = await execFileAsync(
-        args.opencodeExecutable,
-        ["debug", "config", "--pure"],
-        { cwd: args.workspace, env: environment, encoding: "utf8" },
-      ));
-    } catch (error) {
-      throw new OpenCodeAdapterError(
-        (error as NodeJS.ErrnoException | undefined)?.code === "ENOENT"
-          ? "OPENCODE_EXECUTABLE_UNAVAILABLE"
-          : "OPENCODE_PROFILE_NOT_ISOLATED",
-      );
-    }
-    let resolved: unknown;
-    try {
-      resolved = JSON.parse(stdout);
-    } catch {
-      throw new OpenCodeAdapterError("OPENCODE_PROFILE_NOT_ISOLATED");
-    }
-    if (!resolvedProfileIsIsolated(resolved, profile)) {
-      throw new OpenCodeAdapterError("OPENCODE_PROFILE_NOT_ISOLATED");
-    }
+    const environment = await preflightOpenCodeSubject(
+      args,
+      profile,
+      configHome,
+    );
 
     const exitCode = await runChild(
       args.opencodeExecutable,

@@ -47,3 +47,28 @@ additional connection.
 This is an MCP-path reference profile, not an OS sandbox. It does not prevent the same local user
 from reading `.runtime/protected-storage` or stealing configuration through filesystem, shell,
 process, environment, or credential access.
+
+## Experimental host-isolated OpenCode profile
+
+On macOS, run the stricter launcher instead:
+
+```bash
+OPENCODE_BIN=/absolute/path/to/opencode \
+  examples/finance-support/scripts/launch-opencode-isolated.sh finance-agent
+```
+
+It keeps SubjectBroker outside the generated sandbox, gives OpenCode only a stdio relay to the
+already-bound broker socket, and denies the sandboxed workload all file reads and writes under
+`.runtime`. The `workspace` directory remains outside that trust root. The same resolved
+single-connection preflight still runs before OpenCode starts. Registered resources with
+pre-existing hard links are rejected because a hard-link alias can bypass path-only rules.
+
+Check the host differential without a model or provider call:
+
+```bash
+npm run --silent conformance:host
+```
+
+This path is an experimental, version-pinned macOS reference. Apple deprecates `sandbox-exec`,
+the socket is a transferable local capability, and arbitrary credentials, processes, and network
+destinations are not isolated.

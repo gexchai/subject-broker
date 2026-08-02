@@ -17,9 +17,9 @@ default-deny policy 判断读取权限，并且只有在权限允许且 metadata
 
 > [!WARNING]
 > SubjectBroker 是实验性的 macOS 安全研究原型，不是 production security boundary，
-> 也不是 Agent sandbox。如果 Agent 本身拥有直接访问 filesystem、shell、network、
-> browser、credential 或其他 process 的能力，它仍然可能绕过 Broker。这些路径必须由
-> OS-level sandbox 或 container 等隔离机制控制。
+> 也不是通用 Agent sandbox。Broker 本身仍可被直接 filesystem 访问绕过。项目现在有
+> 一个实验性 OpenCode launcher，会在经过版本固定测试的 macOS 拓扑中阻断指定 trust
+> root；它不隔离任意 credential、network、process 或未来 macOS 版本。
 
 ## 这个项目要解决什么问题？
 
@@ -96,6 +96,35 @@ audit；同时明确把 agent harness 的连接隔离、host 直接访问和不�
 [安全边界说明](docs/security-boundary.md)和
 [finance/support 示例](examples/finance-support/README.md)。
 
+另一个不依赖模型的命令会验证实验性 host 隔离差异：
+
+```bash
+npm run --silent conformance:host
+```
+
+它证明 sandbox 内的 probe 无法直接读取 dedicated trust root 或通过 workspace symlink
+绕过限制，同时授权 Broker 路径仍然可用。报告仍会把 agent harness 标记为
+`not-exercised`，把不可转移身份标记为 `not-provided`。
+
+## 实验性 host-isolated OpenCode 启动
+
+```bash
+examples/finance-support/scripts/prepare.sh
+
+OPENCODE_BIN=/absolute/path/to/opencode \
+  examples/finance-support/scripts/launch-opencode-isolated.sh finance-agent
+```
+
+Trusted launcher 会在 sandbox 外启动已绑定 subject 的 Broker；OpenCode 只获得通往
+owner-only Unix socket 的 stdio relay，不会获得 policy、storage、audit 或 subject
+启动参数。Policy、storage 和 audit 必须位于 workspace 外同一个 dedicated trust root，
+该 root 会被禁止读取和写入。已有 hard link 的 registered resource 会被拒绝，因为
+path-based sandbox 无法安全阻断这类 alias。
+
+Apple 已将 `sandbox-exec` 标记为 deprecated，因此这只是版本固定的研究证据，不是可移植
+的 production sandbox。Socket 仍是可转移的本地 capability，也不提供通用 credential、
+process 或 network 隔离。
+
 ## 实际测试过的 Agent 行为
 
 以下结果都绑定到特定版本，不代表未来版本一定保持相同行为。
@@ -106,6 +135,7 @@ audit；同时明确把 agent harness 的连接隔离、host 直接访问和不�
 | Codex CLI 0.144.4 | Native child 继承父 Agent 的 MCP 连接 | 每个 subject 使用独立 process 和 `CODEX_HOME`；已测试到第二层 delegation |
 | Hermes Agent 0.19.0 | Native delegation 继承 profile 内的连接 | 每个 subject 使用独立的 top-level process/profile |
 | Pi 0.82.1 | 测试版本没有 native subagent 机制 | 使用独立 single-subject process；直接读取路径仍然需要 sandbox |
+| OpenCode 1.18.10 | 内置 `general` 继承父 Agent 权限；named exact allowlist 会拒绝排除的工具 | 每层 delegation 都使用 wildcard deny 和 exact MCP-tool allowlist；已测试到第二层 |
 
 完整限制和部署方式请参考：
 
@@ -113,6 +143,7 @@ audit；同时明确把 agent harness 的连接隔离、host 直接访问和不�
 - [Codex integration](docs/integration-codex.md)
 - [Hermes integration](docs/integration-hermes.md)
 - [Pi integration](docs/integration-pi.md)
+- [OpenCode integration](docs/integration-opencode.md)
 
 ## 五分钟演示
 
@@ -154,10 +185,9 @@ npm test
 
 SubjectBroker 目前不提供：
 
-- OS sandboxing；
-- 强制 Agent 的所有读取都必须经过 Broker；
-- 防止直接使用 filesystem、shell、network、browser、clipboard、credential 或
-  process；
+- 可移植、production-supported 的 OS sandboxing 或 mandatory routing；
+- ADR-027 指定 trust root 和 launcher 拓扑之外的 direct-path protection；
+- 通用 shell、network、browser、clipboard、credential 或 process isolation；
 - encryption、redaction、classification、search 或 write operation；
 - daemon 或 cloud control plane；以及
 - 保证第三方 Agent framework 正确隔离自己的 delegated context。
@@ -171,7 +201,7 @@ SubjectBroker 目前不提供：
 
 ## 证据与项目状态
 
-SubjectBroker 目前是 **experimental、working、attack-tested spike**。
+SubjectBroker 目前是 **experimental、working、attack-tested research prototype**。
 
 - [Threat model](THREAT_MODEL.md)
 - [Architecture decisions](DECISIONS.md)
@@ -185,8 +215,8 @@ SubjectBroker 目前是 **experimental、working、attack-tested spike**。
 normalized configuration 和 Broker audits。账户、本机、plugin、session、request、
 thinking signature 和其他无关 provider metadata 不会公开。
 
-在 production 使用前，direct-read path 必须由经过独立验证的 OS sandbox 关闭，并
-重新进行安全审查。
+ADR-027 的 direct-read 结果只适用于其明确测试的 deprecated macOS 机制。在
+production 使用前，仍需采用受支持的 host-isolation 设计并重新进行安全审查。
 
 Contribution 请参考 [CONTRIBUTING.md](CONTRIBUTING.md)，潜在漏洞请按照
 [SECURITY.md](SECURITY.md) 私下报告。

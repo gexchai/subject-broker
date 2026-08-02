@@ -56,8 +56,10 @@ use.
 
 The following are documented limitations, not new broker vulnerabilities by themselves:
 
-- direct filesystem, shell, network, clipboard, browser, credential, or process access;
-- absence of OS-level sandboxing or mandatory routing through SubjectBroker;
+- direct filesystem access outside the exact ADR-027 trust-root topology, plus general shell,
+  network, clipboard, browser, credential, or process access;
+- absence of portable, production-supported OS isolation or mandatory routing through
+  SubjectBroker; ADR-027 is a deprecated, version-pinned macOS research mechanism;
 - a third-party harness exposing multiple subject-bound connections to one agent context;
 - version-pinned Claude Code, Codex, Hermes, Pi, OpenCode, or VS Code behavior already recorded
   in the integration guides;

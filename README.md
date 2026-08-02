@@ -15,8 +15,10 @@ protocol-independent.
 
 > [!WARNING]
 > SubjectBroker is an experimental macOS research prototype, not a production security boundary
-> or an agent sandbox. An agent with direct filesystem, shell, network, browser, credential, or
-> process access can bypass the broker. Use OS-level isolation to close those paths.
+> or a general agent sandbox. The broker alone can be bypassed by direct filesystem access. An
+> experimental OpenCode launcher now blocks the registered trust-root path in one version-pinned
+> macOS topology; it does not isolate arbitrary credentials, networks, processes, or future macOS
+> releases.
 
 SubjectBroker is useful when multiple AI agents work against the same project and some registered
 data should be reachable by only some of them. It is not a replacement for a sandbox.
@@ -152,6 +154,17 @@ model, proves the tested SubjectBroker-layer allow and deny properties, and expl
 agent-harness connection isolation, direct host access, and non-transferable identity as
 `not-provided`.
 
+Run the separate macOS host-isolation differential:
+
+```bash
+npm run --silent conformance:host
+```
+
+This starts the broker outside a generated sandbox and proves that the sandboxed probe cannot
+read the dedicated trust root directly or through a workspace symlink while the authorized
+broker path remains functional. Its report still marks agent-harness execution as
+`not-exercised` and non-transferable subject identity as `not-provided`.
+
 See the [security-boundary definition](docs/security-boundary.md) and
 [finance/support reference slice](examples/finance-support/README.md) before interpreting an
 overall `pass`. It is a broker conformance result, not a whole-agent security certification.
@@ -168,6 +181,37 @@ The implemented macOS path includes:
 - fail-closed audit semantics;
 - non-sensitive denial and startup diagnostics; and
 - a capability report that names covered and uncovered paths.
+
+The optional ADR-027 reference topology additionally provides a trusted launcher, owner-only
+Unix-socket relay, dedicated trust-root denial, and a model-free host differential for the tested
+macOS path.
+
+## Experimental host-isolated OpenCode launch
+
+Prepare the finance/support fixture, then launch a single subject through the experimental host
+profile:
+
+```bash
+examples/finance-support/scripts/prepare.sh
+
+OPENCODE_BIN=/absolute/path/to/opencode \
+  examples/finance-support/scripts/launch-opencode-isolated.sh finance-agent
+```
+
+The trusted launcher starts the already-bound broker outside the sandbox. OpenCode receives only
+a local stdio relay to that broker's owner-only Unix socket; it does not receive policy, storage,
+audit, or subject startup arguments. The resolved OpenCode configuration must still contain
+exactly one SubjectBroker connection.
+
+Policy, storage, and audit must share one dedicated trust root outside the OpenCode workspace.
+The sandbox denies all reads and writes under that root. Startup fails closed if those paths do
+not form the required topology or if a registered resource has a pre-existing hard link.
+
+Apple documents `sandbox-exec` as deprecated. This profile is version-pinned research evidence,
+not a portable production sandbox. The assigned socket is a local bearer capability rather than
+non-transferable workload identity, and arbitrary credential, process, and network isolation
+remain outside the claim. See [ADR-027](DECISIONS.md) and the
+[security-boundary definition](docs/security-boundary.md).
 
 ## Field-tested agent behavior
 
@@ -275,9 +319,9 @@ privileged-first call. A `clear` result does not prove safe delegation.
 
 SubjectBroker does not currently provide:
 
-- OS sandboxing or mandatory routing through the broker;
-- protection from direct filesystem, shell, network, browser, clipboard, credential, or process
-  access;
+- portable, production-supported OS sandboxing or mandatory routing through the broker;
+- direct-path protection outside the exact ADR-027 trust root and launcher topology;
+- general shell, network, browser, clipboard, credential, or process isolation;
 - encryption, redaction, classification, search, or write operations;
 - a daemon or cloud control plane; or
 - a guarantee that third-party agent frameworks isolate their own delegated contexts.
@@ -306,15 +350,16 @@ hashes are retained for provenance.
 
 ## Project status
 
-Status: **experimental, working, attack-tested spike**.
+Status: **experimental, working, attack-tested research prototype**.
 
 SubjectBroker was developed under the former working name **ContextGuard**. Dated architecture
 decisions and retained field evidence preserve that name where changing it would rewrite the
 historical record.
 
 The policy schema and behavior may change. Only entries marked `decided` in
-[DECISIONS.md](DECISIONS.md) describe deliberate choices for this spike. Before production use,
-the direct-read path requires an independently verified OS sandbox and a fresh security review.
+[DECISIONS.md](DECISIONS.md) describe deliberate choices for this prototype. The ADR-027
+direct-read result applies only to its exact deprecated macOS mechanism. Production use still
+requires a supported host-isolation design and a fresh security review.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change. Potential vulnerabilities
 should follow the private-reporting guidance in [SECURITY.md](SECURITY.md).

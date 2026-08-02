@@ -2,9 +2,9 @@
 
 Status: `field-tested` for OpenCode 1.18.10 named subagents, including nesting through depth 2.
 
-SubjectBroker cannot stop OpenCode from using direct filesystem, shell, network, browser,
-credential, or process access. Use OS-level isolation when the protected storage path must be
-unreachable outside MCP.
+The ordinary SubjectBroker adapter cannot stop OpenCode from using direct filesystem, shell,
+network, browser, credential, or process access. ADR-027 adds an experimental macOS launcher for
+one dedicated trust root; it is not a general or production-supported sandbox.
 
 ## Security conclusion
 
@@ -100,5 +100,41 @@ MCP entry without checking the resolved union is therefore not an isolation cont
 preflight addresses that configuration failure mode for the tested profile; it is not an OS
 sandbox and does not protect same-user files, processes, environments, or credentials.
 
+## Experimental macOS host-isolated launcher
+
+The finance/support example also provides a stricter path:
+
+```bash
+examples/finance-support/scripts/prepare.sh
+
+OPENCODE_BIN=/absolute/path/to/opencode \
+  examples/finance-support/scripts/launch-opencode-isolated.sh finance-agent
+```
+
+This launcher performs the same resolved-config preflight, but it starts SubjectBroker outside
+the workload sandbox and replaces OpenCode's local MCP command with a content-agnostic
+stdio-to-Unix-socket relay. The relay sees the assigned owner-only socket path, not the policy,
+storage, audit, or subject startup arguments.
+
+The policy file, registered storage, and audit destination must share a dedicated trust root
+outside the OpenCode workspace. The generated macOS profile denies the sandboxed process every
+file read and write under that root. Invalid path topology, missing `sandbox-exec`, broker startup
+failure, a registered resource with link count other than one, a changed resolved MCP union, or
+an OpenCode failure aborts the launch.
+
+Verify the model-free differential independently:
+
+```bash
+npm run --silent conformance:host
+```
+
+The report proves that direct and workspace-symlink reads fail while the external authorized
+broker remains usable and continues to deny a known unauthorized resource. It deliberately
+reports the harness as `not-exercised` and non-transferable identity as `not-provided`.
+
+Apple marks `sandbox-exec` deprecated. The result is version-pinned research evidence, not a
+portable production guarantee. The socket remains a local bearer capability; arbitrary network,
+credential, and same-user process isolation remain outside scope.
+
 See [the finance/support reference slice](../examples/finance-support/README.md), ADR-025, and
-ADR-026.
+ADR-026–027.
